@@ -1,30 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src='https://cdn.socket.io/socket.io-3.0.1.min.js'></script>
-    <title>Document</title>
-</head>
-<body>
-    <input type="text" class='message'>
-    <button onclick="sendMessage()">Send Message</button>
-    <h1></h1>
-    <script>
-        const socket= io('http://localhost:3000');
-        
-        socket.on('connection');
-
-        socket.on('message',(data)=>{
-            document.querySelector("h1").innerHTML = data;
-        })
-
-        const sendMessage=()=>{
-            const message=document.querySelector('.message');
-
-            socket.emit('message',message.value);
+    <title>Socket.IO chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        form {
+            background: #000;
+            padding: 3px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        form input {
+            border: 0;
+            padding: 10px;
+            width: 90%;
+            margin-right: 0.5%;
+        }
+
+        form button {
+            width: 9%;
+            background: rgb(130, 224, 255);
+            border: none;
+            padding: 10px;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <ul id="messages"></ul>
+    <form action="">
+        <input id="username" autocomplete="off" placeholder="username" />
+        <input id="m" autocomplete="off" placeholder="equation" />
+        <button>Send</button>
+    </form>
+    <script src="http://localhost:8000/socket.io/socket.io.js">
+    </script>
+    <script>
+        const socket = io("http://localhost:8000");
+        const form = document.querySelector('form');
+        const messages = document.querySelector('#messages');
+        function createMessage(msg) {
+            const li = document.createElement('li');
+            li.textContent = `${msg.text},${msg.username},${msg.created_at}`
+            messages.append(li);
+        }
+        function createMessages(msgs) {
+            msgs.forEach(createMessage);
+        }
+
+        fetch("http://localhost:3000/messages")
+            .then(res => res.json())
+            .then(createMessages);
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            socket.emit('chat message', JSON.stringify({
+                text: document.querySelector('#m').value,
+                username: document.querySelector('#username').value
+            }));
+            e.target.reset();
+        });
+        socket.on('chat message', function (msgs) {
+            console.log(msgs)
+            messages.innerHTML = "";
+            createMessages(msgs);
+        });
     </script>
 </body>
+
 </html>
