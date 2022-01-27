@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       models.Users.hasMany(models.Messages, {
-        foreignKey: "senderId",
+        foreignKey: "senderID",
         sourceKey: "id",
       });
       models.Users.hasMany(models.Messages, {
-        foreignKey: "receiverId",
+        foreignKey: "recieverID",
         sourceKey: "id",
       });
     }
